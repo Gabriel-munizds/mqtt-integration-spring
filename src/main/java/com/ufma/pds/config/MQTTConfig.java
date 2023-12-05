@@ -1,5 +1,8 @@
 package com.ufma.pds.config;
 
+import com.ufma.pds.model.PWM;
+import com.ufma.pds.repository.PWMRepository;
+import jakarta.transaction.Transactional;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,8 +20,15 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 
+import java.math.BigDecimal;
+
 @Configuration
 public class MQTTConfig {
+    private final PWMRepository pwmRepository;
+
+    public MQTTConfig(PWMRepository pwmRepository) {
+        this.pwmRepository = pwmRepository;
+    }
 
 
     public MqttPahoClientFactory mqttPahoClientFactory(){
@@ -42,7 +52,6 @@ public class MQTTConfig {
     public MessageProducer inBound(){
         MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter("serverIn",
                 mqttPahoClientFactory(), "#");
-
         adapter.setCompletionTimeout(5000);
         adapter.setConverter(new DefaultPahoMessageConverter());
         adapter.setQos(2);
@@ -52,21 +61,26 @@ public class MQTTConfig {
 
     @Bean
     @ServiceActivator(inputChannel = "mqttInputChannel")
+    @Transactional
     public MessageHandler handler(){
         return new MessageHandler() {
             @Override
             public void handleMessage(Message<?> message) throws MessagingException {
                 String topic = message.getHeaders().get(MqttHeaders.RECEIVED_TOPIC).toString();
                 if(topic.equals("myTopic")){
-                    System.out.println("Esse é o meu tópico!");
+                    System.out.println("Mensagem Recebida!");
                 }
                 System.out.println(message.getPayload());
+                System.out.println(message.getHeaders());
+                message.getHeaders().getTimestamp();
+
+                BigDecimal valorRecebido = new BigDecimal(message.getPayload().toString());
+                PWM sinal = new PWM();
+                sinal.setValorPwm(valorRecebido);
+                sinal.setTimestamp(message.getHeaders().getTimestamp());
+                pwmRepository.save(sinal);
             }
         };
-    }
-    @Bean
-    public MessageChannel mqttOutboundChannel(){
-        return new DirectChannel();
     }
     @Bean
     @ServiceActivator(inputChannel = "mqttOutboundChannel")

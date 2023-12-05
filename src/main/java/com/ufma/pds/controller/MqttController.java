@@ -15,7 +15,6 @@ public class MqttController {
     public MqttController(MqttService mqttService) {
         this.mqttService = mqttService;
     }
-    //teste commit
     @PostMapping("/sendMessage")
     public ResponseEntity<?> publish(@RequestBody String mqttMessage){
         return ResponseEntity.ok(mqttService.sendMessage(mqttMessage));

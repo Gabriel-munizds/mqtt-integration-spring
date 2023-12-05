@@ -3,14 +3,12 @@ package com.ufma.pds.service;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.ufma.pds.resource.MQTTGateway;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
 public class MqttService {
     private final MQTTGateway mqttGateway;
-
-    public MqttService(MQTTGateway mqttGateway) {
+    public MqttService(MQTTGateway mqttGateway){
         this.mqttGateway = mqttGateway;
     }
 
@@ -24,4 +22,5 @@ public class MqttService {
             return "Falha ao Enviar Mensagem";
         }
     }
+
 }
