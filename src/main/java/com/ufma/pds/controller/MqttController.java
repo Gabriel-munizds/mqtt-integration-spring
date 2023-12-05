@@ -12,11 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class MqttController {
 
     private final MqttService mqttService;
-
     public MqttController(MqttService mqttService) {
         this.mqttService = mqttService;
     }
-
+    //teste commit
     @PostMapping("/sendMessage")
     public ResponseEntity<?> publish(@RequestBody String mqttMessage){
         return ResponseEntity.ok(mqttService.sendMessage(mqttMessage));
